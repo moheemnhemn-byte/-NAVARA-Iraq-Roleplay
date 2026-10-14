@@ -1,33 +1,31 @@
 name: NAVARA Pawn Build
 
 on:
-workflow_dispatch:
-push:
-paths:
-- 'gamemodes/'
-- 'pawno/include/'
-- 'include/**'
-- '.github/workflows/compile.yml'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'gamemodes/**'
+      - 'pawno/include/**'
+      - 'include/**'
+      - '.github/workflows/compile.yml'
 
 jobs:
-compile:
-runs-on: ubuntu-latest
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
+      - name: Compile NAVARA gamemode
+        uses: knryuu/pawn-compiler-action@v1
+        with:
+          input: gamemodes/Dubai-V2.pwn
+          output: gamemodes/Dubai-V2.amx
+          includes: 'pawno/include include'
 
-  - name: Compile NAVARA gamemode
-    id: pawn
-    uses: knryuu/pawn-compiler-action@v1
-    with:
-      input: gamemodes/Dubai-V2.pwn
-      output: gamemodes/Dubai-V2.amx
-      includes: 'pawno/include include'
-
-  - name: Upload compiled AMX
-    if: success()
-    uses: actions/upload-artifact@v4
-    with:
-      name: NAVARA-AMX
-      path: gamemodes/Dubai-V2.amx
+      - name: Upload compiled AMX
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NAVARA-AMX
+          path: gamemodes/Dubai-V2.amx

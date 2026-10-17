@@ -1,3 +1,4 @@
+
 name: NAVARA Pawn Build
 
 on:
@@ -12,26 +13,38 @@ on:
 jobs:
   compile:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install extraction tool
+      - name: Install extraction tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full
+          sudo apt-get install -y p7zip-full git
 
       - name: Extract Pawn includes
         run: |
           mkdir -p pawno/include
-          7z x pawno/include.rar -opawno/include -y
+          if [ -f pawno/include.rar ]; then
+            7z x pawno/include.rar -opawno/include -y
+          fi
+
+      - name: Download open.mp standard includes
+        run: |
+          git clone --depth 1 https://github.com/openmultiplayer/omp-stdlib.git /tmp/omp-stdlib
+
+      - name: Verify required include
+        run: |
+          find /tmp/omp-stdlib -iname "open.mp.inc" -o -iname "open.mp"
+          find pawno/include include -iname "open.mp.inc" -o -iname "open.mp" || true
 
       - name: Compile NAVARA gamemode
         uses: knryuu/pawn-compiler-action@v1
         with:
           input: gamemodes/Dubai-V2.pwn
           output: gamemodes/Dubai-V2.amx
-          includes: "pawno/include include"
+          includes: "/tmp/omp-stdlib pawno/include include"
 
       - name: Upload compiled AMX
         if: success()
@@ -39,4 +52,3 @@ jobs:
         with:
           name: NAVARA-AMX
           path: gamemodes/Dubai-V2.amx
-
